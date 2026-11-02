@@ -4,7 +4,7 @@
 (Data Harvest, до 1000 Гц), очистка сигнала, расчёт метрик, ИИ-вопросы в формате PISA и
 1-страничный PDF «Цифровой паспорт исследования».
 
-**Приложение:** https://physaudit-lab.streamlit.app
+**Приложение:** https://physlab-nswizu3kfoc2s8vuoq62fq.streamlit.app
 
 ## Возможности
 
@@ -43,7 +43,7 @@ streamlit run app.py
 1. Создать **публичный** репозиторий на GitHub и загрузить файлы проекта
    (`app.py`, `requirements.txt`, `.gitignore`, `README.md`, `.streamlit/config.toml`).
 2. Зайти на https://share.streamlit.io → **Create app** → выбрать репозиторий, ветку `main`, файл `app.py`.
-3. В поле **App URL** указать `physaudit-lab` → ссылка `https://physaudit-lab.streamlit.app`.
+3. В поле **App URL** можно задать короткий адрес (по умолчанию генерируется автоматически).
 4. (Необязательно) **Advanced settings → Secrets**: вставить ключ ИИ (см. ниже).
 5. **Deploy**.
 
@@ -65,7 +65,7 @@ OPENAI_MODEL = "gemini-2.5-flash"
 
 ## QR-код
 
-`qr_code.png` / `qr_code.svg` уже сгенерированы для `https://physaudit-lab.streamlit.app`.
+`qr_code.png` / `qr_code.svg` уже сгенерированы для `https://physlab-nswizu3kfoc2s8vuoq62fq.streamlit.app`.
 Если адрес получился другим:
 
 ```bash

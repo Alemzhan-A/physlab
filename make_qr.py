@@ -3,7 +3,7 @@ import sys
 
 import segno
 
-url = sys.argv[1] if len(sys.argv) > 1 else "https://physaudit-lab.streamlit.app"
+url = sys.argv[1] if len(sys.argv) > 1 else "https://physlab-nswizu3kfoc2s8vuoq62fq.streamlit.app"
 qr = segno.make(url, error="h")
 qr.save("qr_code.png", scale=20, border=2)  # ~ 700 px, для печати
 qr.save("qr_code.svg", scale=10, border=2)  # вектор, любой размер
