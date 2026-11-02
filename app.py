@@ -379,11 +379,11 @@ def metrics_payload(m: Metrics, exp: Experiment) -> dict:
     return {
         "эксперимент": exp.title,
         "величина": f"{exp.symbol}, {exp.unit}",
-        "пик": round(m.peak, 4),
-        "время_пика_с": round(m.t_peak, 4),
-        m.dt_label: round(m.dt, 4) if np.isfinite(m.dt) else None,
-        exp.area_label: f"{round(m.area, 4)} {exp.area_unit}",
-        "фон/среднее": round(m.baseline, 4),
+        "пик": f"{fmt(m.peak)} {exp.unit}",
+        "время_пика": f"{fmt(m.t_peak)} с",
+        m.dt_label: f"{fmt(m.dt)} с",
+        exp.area_label: f"{fmt(m.area)} {exp.area_unit}",
+        "фон/среднее": f"{fmt(m.baseline)} {exp.unit}",
         "частота_дискретизации_Гц": round(m.fs),
     }
 
@@ -411,7 +411,7 @@ def ai_question(m: Metrics, exp: Experiment) -> dict:
                     "жизни, требует рассуждения, а не вычисления по формуле) и краткий критический "
                     "анализ графика (3–5 предложений): что означают пик, длительность и площадь, "
                     "какие погрешности возможны. Используй ТОЛЬКО переданные числа, не выдумывай "
-                    "данных. Без LaTeX и markdown. Ответ — JSON: {\"question\": str, \"analysis\": str}."
+                    "данных, округляй до 2–3 значащих цифр. Пиши СТРОГО на русском языке. Без LaTeX и markdown. Ответ — JSON: {\"question\": str, \"analysis\": str}."
                 )},
                 {"role": "user", "content": json.dumps(metrics_payload(m, exp), ensure_ascii=False)},
             ],
@@ -441,7 +441,7 @@ def fallback_check(answer: str, m: Metrics, exp: Experiment) -> str:
     """Проверка без API: сверяет числа из ответа с метриками и ищет ключевые понятия."""
     refs = {
         "пик": m.peak, "длительность/период": m.dt, "площадь": m.area,
-        "длительность в мс": m.dt * 1000, "фон": m.baseline,
+        "длительность в мс": m.dt * 1000,
     }
     refs = {k: v for k, v in refs.items() if np.isfinite(v) and v != 0}
     numbers = [float(n.replace(",", ".")) for n in NUM_RE.findall(answer)]
@@ -488,6 +488,7 @@ def ai_check(answer: str, question: str, m: Metrics, exp: Experiment) -> tuple[s
                     "Ты — Socratic AI Auditor. Проверь ответ ученика на вопрос к графику. "
                     "Сверь каждое число и утверждение ученика с измеренными метриками; всё, "
                     "что не следует из данных или противоречит физике, пометь как «галлюцинацию». "
+                    "Условия, заданные в самом вопросе (например, «импульс остаётся прежним»), — не галлюцинации. "
                     "Не давай готового ответа — задай 1 наводящий сократовский вопрос. "
                     "Формат: 3–6 коротких пунктов на русском, в конце строка «Итог: …»."
                 )},
