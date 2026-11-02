@@ -44,8 +44,24 @@ streamlit run app.py
    (`app.py`, `requirements.txt`, `.gitignore`, `README.md`, `.streamlit/config.toml`).
 2. Зайти на https://share.streamlit.io → **Create app** → выбрать репозиторий, ветку `main`, файл `app.py`.
 3. В поле **App URL** указать `physaudit-lab` → ссылка `https://physaudit-lab.streamlit.app`.
-4. (Необязательно) **Advanced settings → Secrets**: вставить содержимое `secrets.toml.example` с реальным ключом.
+4. (Необязательно) **Advanced settings → Secrets**: вставить ключ ИИ (см. ниже).
 5. **Deploy**.
+
+## Бесплатный ИИ-ключ
+
+Код работает с любым OpenAI-совместимым API. Бесплатный вариант — **Google Gemini**:
+
+1. Открыть https://aistudio.google.com/apikey → войти через Google → **Create API key**.
+2. В Streamlit Cloud: **App → ⋮ → Settings → Secrets** вставить:
+
+```toml
+OPENAI_API_KEY = "AIza...ваш_ключ"
+OPENAI_BASE_URL = "https://generativelanguage.googleapis.com/v1beta/openai/"
+OPENAI_MODEL = "gemini-2.5-flash"
+```
+
+Альтернатива — **Groq** (https://console.groq.com/keys), см. `.streamlit/secrets.toml.example`.
+Если ключ неверный или лимит исчерпан, приложение не падает, а переходит в офлайн-режим.
 
 ## QR-код
 

@@ -333,18 +333,33 @@ def make_figure(t, y_raw, y_smooth, m: Metrics, exp: Experiment, ylabel: str):
 
 
 def get_api_key() -> str | None:
+    return _setting("OPENAI_API_KEY")
+
+
+def _setting(name: str, default: str | None = None) -> str | None:
     try:
-        key = st.secrets.get("OPENAI_API_KEY")
+        val = st.secrets.get(name)
     except Exception:  # нет secrets.toml
-        key = None
-    return key or os.environ.get("OPENAI_API_KEY") or None
+        val = None
+    return val or os.environ.get(name) or default
 
 
 def get_model() -> str:
-    try:
-        return st.secrets.get("OPENAI_MODEL", DEFAULT_MODEL)
-    except Exception:
-        return os.environ.get("OPENAI_MODEL", DEFAULT_MODEL)
+    return _setting("OPENAI_MODEL", DEFAULT_MODEL)
+
+
+def make_client():
+    """OpenAI-совместимый клиент. OPENAI_BASE_URL позволяет использовать бесплатные
+    провайдеры (Google Gemini, Groq, OpenRouter) с тем же кодом."""
+    from openai import OpenAI
+
+    return OpenAI(api_key=get_api_key(), base_url=_setting("OPENAI_BASE_URL"), timeout=30)
+
+
+def parse_json(text: str) -> dict:
+    """JSON из ответа модели (некоторые провайдеры оборачивают его в ```json … ```)."""
+    m = re.search(r"\{.*\}", text, re.S)
+    return json.loads(m.group(0) if m else text)
 
 
 def template_values(m: Metrics, exp: Experiment) -> dict[str, str]:
@@ -384,9 +399,7 @@ def ai_question(m: Metrics, exp: Experiment) -> dict:
     if not key:
         return fallback_question(m, exp)
     try:
-        from openai import OpenAI
-
-        client = OpenAI(api_key=key)
+        client = make_client()
         resp = client.chat.completions.create(
             model=get_model(),
             temperature=0.6,
@@ -403,9 +416,9 @@ def ai_question(m: Metrics, exp: Experiment) -> dict:
                 {"role": "user", "content": json.dumps(metrics_payload(m, exp), ensure_ascii=False)},
             ],
         )
-        data = json.loads(resp.choices[0].message.content)
+        data = parse_json(resp.choices[0].message.content)
         return {"question": data["question"], "analysis": data["analysis"],
-                "source": f"OpenAI {get_model()}"}
+                "source": f"ИИ: {get_model()}"}
     except Exception as e:  # сеть, лимиты, неверный ключ — не роняем приложение
         out = fallback_question(m, exp)
         out["source"] = f"офлайн-шаблон (ошибка API: {type(e).__name__})"
@@ -466,9 +479,7 @@ def ai_check(answer: str, question: str, m: Metrics, exp: Experiment) -> tuple[s
     if not key:
         return fallback_check(answer, m, exp), "офлайн-проверка"
     try:
-        from openai import OpenAI
-
-        client = OpenAI(api_key=key)
+        client = make_client()
         resp = client.chat.completions.create(
             model=get_model(),
             temperature=0.2,
@@ -486,7 +497,7 @@ def ai_check(answer: str, question: str, m: Metrics, exp: Experiment) -> tuple[s
                 )},
             ],
         )
-        return resp.choices[0].message.content.strip(), f"OpenAI {get_model()}"
+        return resp.choices[0].message.content.strip(), f"ИИ: {get_model()}"
     except Exception as e:
         return fallback_check(answer, m, exp), f"офлайн-проверка (ошибка API: {type(e).__name__})"
 
