@@ -1,0 +1,7 @@
+streamlit>=1.40
+pandas>=2.0
+numpy>=1.26
+scipy>=1.11
+matplotlib>=3.8
+fpdf2>=2.7.9
+openai>=1.40
